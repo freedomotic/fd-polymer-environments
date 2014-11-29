@@ -1,0 +1,34 @@
+{
+  "name": "fd-polymer-environment",
+  "version": "0.2.0",
+  "keywords": [
+    "freedomotic",
+    "seed",
+    "polymer",
+    "web-components"
+  ],
+  "main": "fd-polymer-environment.html",
+  "dependencies": {
+    "polymer": "Polymer/polymer#^0.5.0",
+    "fd-polymer-rest-service": "~0.1.14",
+    "fd-polymer-ws-service": "~0.1.6",
+    "paper-elements": "polymer/paper-elements#~0.5.1"
+  },
+  "devDependencies": {
+    "polymer-test-tools": "Polymer/polymer-test-tools#^0.5.0"
+  },
+  "authors": [
+    "Matteo Mazzoni <matteo@bestmazzo.it>",
+    "Niko Zarzani <niko.zarzani@nautes.com>"
+  ],
+  "description": "Element showing a Environment with rooms and Things in it",
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "../",
+    "test",
+    "tests"
+  ]
+}
