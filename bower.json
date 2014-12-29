@@ -1,13 +1,13 @@
 {
-  "name": "fd-polymer-environment",
-  "version": "0.4.0",
+  "name": "fd-polymer-environments",
+  "version": "0.4.1",
   "keywords": [
     "freedomotic",
     "seed",
     "polymer",
     "web-components"
   ],
-  "main": "fd-polymer-environment.html",
+  "main": "fd-polymer-environments.html",
   "dependencies": {
     "polymer": "Polymer/polymer#^0.5.2",
     "fd-polymer-rest-service": "~0.2.2",
