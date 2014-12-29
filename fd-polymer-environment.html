@@ -1,4 +1,5 @@
 <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../core-drag-drop/core-drag-drop.html">
 <link rel="import" href="../paper-shadow/paper-shadow.html">
 <link rel="import" href="../paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../fd-polymer-api-settings/fd-polymer-api-settings.html">
@@ -17,7 +18,7 @@ Element showing a Environment with rooms and Things in it
 @status alpha
 @homepage http://polymerlabs.github.io/fd-polymer-environment
 -->
-<polymer-element name="fd-environment" attributes="envuuid environment toast guest">
+<polymer-element name="fd-environment" attributes="envuuid environment toast guest sizing">
   <template>
     <style>
       :host {
@@ -45,6 +46,13 @@ Element showing a Environment with rooms and Things in it
       width: 50px;
       height: 50px;
     }
+
+    #obj-container:hover{
+      background-color: black;
+      opacity: 0.5;
+      filter: alpha(opacity=50); /* For IE8 and earlier */
+    }
+
     </style>
   <fd-api-settings
     credentialRequired="{{credentialRequired}}" 
@@ -76,16 +84,17 @@ Element showing a Environment with rooms and Things in it
     apiVersion="{{apiVersion}}"
     wstype="objectchange" 
     on-message="{{ updateObject }}"
-    auto="true">
+    auto="false">
     </fd-ws-service>
 
 
-<paper-shadow animated z="1" >
-<div layout vertical start>
-  <div layout horizontal center self-stretch class="title">
-    <h2>{{environment.name}}</h2>
+<paper-shadow animated z="1" id="externalContainer">
+<div layout vertical center >
+  <div layout horizontal self-stretch class="title">
+    <h3>{{environment.name}}</h3>
   </div>
-  <div id="container" relative>
+  <div relative  id="container">
+    <core-drag-drop on-drag-start="{{dragStartHandler}}"></core-drag-drop>
     <canvas id="environmentCanvas" width="{{environment.width}}px" height="{{environment.height}}px"></canvas>
     <img width="{{environment.width}}px" height="{{environment.height}}px" src="{{environment.backgroundImage | asFreedomoticResource(apiUrl) }}"/>
     <template repeat="{{zone in environment.zones}}">
@@ -98,14 +107,16 @@ Element showing a Environment with rooms and Things in it
      fditems="{{objects}}" 
      toast="{{toast}}">
     </fd-rest-service>
-    
-    <template repeat="{{envObject in objects}}">
+    <div>
+        <template repeat="{{envObject in objects}}">
+
       <paper-icon-button class="thing" id="{{envObject.uuid}}"
         src="{{envObject.representation[envObject.currentRepresentation].icon | asFreedomoticResource(apiUrl)}}" 
         on-tap="{{ objTap  }}" 
-        style="{{objPosition(envObject)}}">
+        style="{{objPosition(envObject)}}" draggable="true">
       </paper-icon-button>
-    </template>
+      </template>
+   </div>
   </div>
   <div layout horizontal self-stretch class="footer">
 
@@ -116,13 +127,32 @@ Element showing a Environment with rooms and Things in it
 </template>
   <script>
     Polymer("fd-environment",{
-
+    /**
+       * The 'guest' attribute tells whether the API call should use guest access (guest:guest) or user-provided data
+       *
+       * @attribute guest
+       * @type boolean
+       */
+    /**
+       * A provided 'environment' object
+       *
+       * @attribute environment
+       * @type object
+       */
+    /**
+       * The 'envuuid' attribute tells which environment should be retrieved through a API call
+       *
+       * @attribute envuuid
+       * @type string
+       */
+      sizing: "contain",
       scaleFactor: 1.0,
       objTap: function(event, t, d){
         this.$.objectClick.fdtype="objects/" +d.id + "/click" ;
         this.$.objectClick.go();
       },
       startWS: function(){
+        this.resize();
         this.$.wss.go();
       },
       objPosition: function(obj){
@@ -138,31 +168,45 @@ Element showing a Environment with rooms and Things in it
 
           var verticalOffset = - (this.environment.height * (1 - this.scaleFactor))/2 + 20;
           element.style.top = verticalOffset+"px";
+
+          var maxHeight = this.environment.height * this.scaleFactor + 100;
+          this.$.externalContainer.style.maxHeight = maxHeight + "px";
+          console.log("External height: " + maxHeight + "px");
+          console.log("Internal scalefactor: "+ this.scaleFactor);
         }
       },
       ready: function(){
         if(!!this.envuuid){
           this.$.envData.auto=true;
           this.$.envData.go();
+        } else {
+          this.$.wss.go();
         }
         this.resize();
-        var element =this;
+        var element = this;
         window.addEventListener('resize', function(event){
           element.resize();
         });
       },
       resize: function(){
+        // set this.scaleFactor and let scaleFactorChanged() do the rest
         this.scaleFactor = this.getScaleFactor();
       },
       getScaleFactor: function(){
+        var scaleFactor = 1;
         if (!!this.environment){
-        var scaleFactorX =  (window.innerWidth  - 100) / this.environment.width;
-        var scaleFactorY =  (window.innerHeight - 150) / this.environment.height;
-        var scaleFactor = Math.min(scaleFactorX,scaleFactorY,1);
+          var scaleFactorX =  (window.innerWidth  - 100) / this.environment.width;
+          // var scaleFactorX =  (this.offsetWidth  - 100) / this.environment.width;
+          var scaleFactorY =  (window.innerHeight - 150) / this.environment.height;
+          // var scaleFactorY =  (this.offsetHeight - 150) / this.environment.height;
+          console.log(scaleFactorX + ":" + scaleFactorY);
+          if (this.sizing=="contain"){
+            scaleFactor = Math.min(scaleFactorX,scaleFactorY);
+          } else if (this.sizing=="cover"){
+            scaleFactor = Math.max(scaleFactorX,scaleFactorY);  
+          }
+        }          
         return scaleFactor;
-      } else {
-        return 1;
-      }
       },
       updateObject: function(event){
         var data = JSON.parse(event.detail);
@@ -171,8 +215,41 @@ Element showing a Environment with rooms and Things in it
             this.objects[object] = data;
           } 
         }
-      }
+      },
+      dragStartHandler: function(e){
+        
+        //set avatar icon
+        var dragInfo = e.detail;
+        var isDraggable = dragInfo.event.target.draggable;
 
+        if(isDraggable){
+          var drop = this.dropFactory();
+          //dragInfo.avatar.style.cssText = 'border: 3px solid black; width: 32px; height: 32px; border-radius: 32px; background-color: whitesmoke';
+          console.log(dragInfo.event.path[0].id);
+          dragInfo.drag = function() {};
+          dragInfo.drop = drop;
+        } else {
+          e.detail = null;
+        }
+      },
+      dropFactory: function(){
+        var self = this;
+        //function executed when dropping element
+        var drop = function(dragInfo) {
+         //var target = dragInfo.event.target;
+         // var dropTarget = dragInfo.event.relatedTarget;
+
+          // move Thing to drop position
+          var f = dragInfo.framed;
+          console.log(dragInfo.event.path[0].style);
+          dragInfo.event.path[0].style.left=f.x + 'px';
+          dragInfo.event.path[0].style.top=f.y +'px';
+          console.log(dragInfo.event.path[0].style);
+          // POST updated data.
+          
+        }
+        return drop;
+      }
     });
   </script>
 </polymer-element>
