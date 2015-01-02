@@ -18,7 +18,7 @@ Element showing a Environment with rooms and Things in it
 @status alpha
 @homepage http://polymerlabs.github.io/fd-polymer-environment
 -->
-<polymer-element name="fd-environment" attributes="envuuid environment toast guest sizing">
+<polymer-element name="fd-environment" attributes="envuuid environment toast guest sizing simple">
   <template>
     <style>
       :host {
@@ -27,12 +27,13 @@ Element showing a Environment with rooms and Things in it
       font-size: 1.2rem;
       font-weight: 300;
       font-family: RobotoDraft, 'Helvetica Neue', Helvetica, Arial;
+      background-color: white;
     }
       canvas{
         position: absolute;
         z-index: 11;
       }
-      .title{
+      #title{
         background-color: #8bae2d;
         padding-left: 10px;
         color: white;
@@ -89,10 +90,12 @@ Element showing a Environment with rooms and Things in it
 
 
 <paper-shadow animated z="1" id="externalContainer">
-<div layout vertical center >
-  <div layout horizontal self-stretch class="title">
+<div layout vertical center flex>
+<template if="{{!simple}}">
+  <div layout horizontal self-stretch id="title">
     <h3>{{environment.name}}</h3>
   </div>
+</template>
   <div relative  id="container">
     <core-drag-drop on-drag-start="{{dragStartHandler}}"></core-drag-drop>
     <canvas id="environmentCanvas" width="{{environment.width}}px" height="{{environment.height}}px"></canvas>
@@ -145,6 +148,7 @@ Element showing a Environment with rooms and Things in it
        * @attribute envuuid
        * @type string
        */
+      simple: false,
       sizing: "contain",
       scaleFactor: 1.0,
       objTap: function(event, t, d){
@@ -166,11 +170,17 @@ Element showing a Environment with rooms and Things in it
           element.style.WebkitTransform = scaleStr;
           element.style.msTransform = scaleStr;
 
-          var verticalOffset = - (this.environment.height * (1 - this.scaleFactor))/2 + 20;
+          var verticalOffset = - (this.environment.height * (1 - this.scaleFactor))/2 + 5;
           element.style.top = verticalOffset+"px";
 
-          var maxHeight = this.environment.height * this.scaleFactor + 100;
+          var maxHeight = this.environment.height * this.scaleFactor + 10;
+          if (!this.simple){
+            maxHeight += this.$.title.offsetHeight;
+          }
           this.$.externalContainer.style.maxHeight = maxHeight + "px";
+          var maxWidth = this.environment.width * this.scaleFactor + 10;
+          this.$.externalContainer.style.maxWidth = maxWidth + "px";
+
           console.log("External height: " + maxHeight + "px");
           console.log("Internal scalefactor: "+ this.scaleFactor);
         }
@@ -195,9 +205,9 @@ Element showing a Environment with rooms and Things in it
       getScaleFactor: function(){
         var scaleFactor = 1;
         if (!!this.environment){
-          var scaleFactorX =  (window.innerWidth  - 100) / this.environment.width;
+          var scaleFactorX =  (window.innerWidth  - 50) / this.environment.width;
           // var scaleFactorX =  (this.offsetWidth  - 100) / this.environment.width;
-          var scaleFactorY =  (window.innerHeight - 150) / this.environment.height;
+          var scaleFactorY =  (window.innerHeight - 50) / this.environment.height;
           // var scaleFactorY =  (this.offsetHeight - 150) / this.environment.height;
           console.log(scaleFactorX + ":" + scaleFactorY);
           if (this.sizing=="contain"){

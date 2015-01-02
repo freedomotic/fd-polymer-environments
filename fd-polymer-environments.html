@@ -18,7 +18,7 @@ Element providing proof of concept of a Thing card, with all needed features
 @status beta
 @homepage http://bestmazzo.github.io/fd-polymer-thing
 -->
-<polymer-element name="fd-environments" attributes="ssl address port apiVersion guest mode">
+<polymer-element name="fd-environments" attributes="ssl address port apiVersion guest simple">
 
   <template>
      <style>
@@ -34,9 +34,9 @@ Element providing proof of concept of a Thing card, with all needed features
     
 <fd-generic-list type="environments" items="{{environments}}" guest="{{guest}}">
   <template repeat="{{environment in environments}}">
-      <fd-environment environment="{{environment}}" style="padding:5px;" ></fd-environment> 
+      <fd-environment environment="{{environment}}" simple="{{simple}}"></fd-environment> 
   </template>
-  </fd-generic-list>
+</fd-generic-list>
      
  </div>
  </template>
@@ -77,7 +77,7 @@ Element providing proof of concept of a Thing card, with all needed features
        * @attribute ssl
        * @type boolean
        */
-    mode: 'list'
+    simple: false
     });
 
   </script>
