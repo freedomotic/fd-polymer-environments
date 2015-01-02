@@ -1,0 +1,7 @@
+{
+  "name": "fd-polymer-environments#gh-pages",
+  "private": true,
+  "dependencies": {
+    "fd-polymer-environments": "freedomotic/fd-polymer-environments#master"
+  }
+}
