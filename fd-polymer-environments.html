@@ -1,4 +1,5 @@
-<link rel="import" href="../polymer/polymer.html">
+  <link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../core-icon-button/core-icon-button.html">
 <link rel="import" href="../fd-polymer-rest-service/fd-polymer-rest-service.html">
 <link rel="import" href="../fd-polymer-ws-service/fd-polymer-ws-service.html">
 <link rel="import" href="../fd-polymer-api-settings/fd-polymer-api-settings.html">
@@ -18,7 +19,7 @@ Element providing proof of concept of a Thing card, with all needed features
 @status beta
 @homepage http://bestmazzo.github.io/fd-polymer-thing
 -->
-<polymer-element name="fd-environments" attributes="ssl address port apiVersion guest simple">
+<polymer-element name="fd-environments" attributes="guest simple showNavigation">
 
   <template>
      <style>
@@ -29,13 +30,45 @@ Element providing proof of concept of a Thing card, with all needed features
       font-weight: 300;
       font-family: RobotoDraft, 'Helvetica Neue', Helvetica, Arial;
     }
-
+    .slide-left, .slide-right{
+        position: fixed;
+        top: 50%;
+        margin-top: -40px;
+        background-color: rgba(250,250,250,0.5); 
+        border-radius: 50%;
+      }
+    .slide-left core-icon-button /deep/ core-icon[role=img], .slide-right core-icon-button /deep/ core-icon[role=img]{
+        height: 90px;
+        width: 90px;
+        color: rgba(50,50,50,0.6);
+      }
+    .slide-left{
+        left: 0px;
+      }
+    .slide-right{
+        right: 0px;
+      }
     </style>
     
 <fd-generic-list type="environments" items="{{environments}}" guest="{{guest}}">
-  <template repeat="{{environment in environments}}">
-      <fd-environment environment="{{environment}}" simple="{{simple}}"></fd-environment> 
+  <template if="{{showNavigation}}">
+    <template if="{{prevExists}}">
+      <div class="slide-left">
+        <core-icon-button icon="chevron-left" on-tap="{{prevEnvironment}}"></core-icon-button>
+      </div>
+    </template>
+    <template if="{{nextExists}}">
+      <div class="slide-right">
+        <core-icon-button icon="chevron-right" on-tap="{{nextEnvironment}}"></core-icon-button>
+      </div>
+    </template>
   </template>
+  <template repeat="{{environment, index in environments}}">
+    <template if="{{showEnvironment(index, currShowing)}}">
+      <fd-environment environment="{{environment}}" simple="{{simple}}"></fd-environment> 
+    </template>
+  </template>
+    
 </fd-generic-list>
      
  </div>
@@ -50,34 +83,48 @@ Element providing proof of concept of a Thing card, with all needed features
        * @type boolean
        */
      /**
-       * The 'address' attribute specifies the hostname or ip address of API service 
+       * The 'simple' attribute specifies whether showing or not header and footer
        *
-       * @attribute address
-       * @type string
-       */
-    
-     /**
-       * The 'apiVersion' attribute specifies the API version to use 
-       *
-       * @attribute apiVersion
-       * @type string
-       */
-    
-     /**
-       * The 'port' attribute specifies the tcp port of API service. 
-       * Default value 0 mean the port number is choosen from the SSL attribute, 
-       * so port will be 9111 if no SSL, and 9113 is SSL
-       * @attribute port
-       * @type int
-       */
-    
-     /**
-       * The 'ssl' attribute tells whether the API call requires a encrypted connection 
-       *
-       * @attribute ssl
+       * @attribute simple
        * @type boolean
        */
-    simple: false
+     /**
+       * The 'showNavigation' attribute specifies whether showing ofr not the navigation buttons
+       *
+       * @attribute ahowNavigation
+       * @type boolean
+       */
+    simple: false,
+    showNavigation: false,
+    nextExists: false,
+    prevExists: false,
+    currShowing: 0,
+    nextEnvironment: function(){
+      if (this.nextExists){
+        this.currShowing++;
+      }
+    },
+    prevEnvironment: function(){
+      if (this.prevExists){
+        this.currShowing--;
+      }
+    },
+    currShowingChanged: function(){
+        this.prevExists = (this.currShowing > 0);
+        this.nextExists = (this.currShowing < this.environments.length-1);
+    },
+    environmentsChanged: function(){
+      if (this.environments.length > 0){
+        this.nextExists = true;
+      }
+    },
+    showEnvironment: function(idx, curr){
+      if (this.showNavigation){
+        return (idx == curr);
+      }
+      return true;
+    }
+
     });
 
   </script>
