@@ -114,8 +114,10 @@ Element providing proof of concept of a Thing card, with all needed features
         this.nextExists = (this.currShowing < this.environments.length-1);
     },
     environmentsChanged: function(){
-      if (this.environments.length > 0){
-        this.nextExists = true;
+      if (!!this.environments){
+        if (this.environments.length > 0){
+          this.nextExists = true;
+        }
       }
     },
     showEnvironment: function(idx, curr){
