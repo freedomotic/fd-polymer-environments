@@ -8,6 +8,7 @@
 <link rel="import" href="../fd-polymer-api-settings/fd-polymer-api-settings.html">
 <link rel="import" href="../fd-polymer-rest-service/fd-polymer-rest-service.html">
 <link rel="import" href="../fd-polymer-ws-service/fd-polymer-ws-service.html">
+<link rel="import" href="../fd-polymer-ispermitted/fd-polymer-ispermitted.html">
 
 <link rel="import" href="./nautes-zone.html">
 <!--
@@ -61,14 +62,14 @@ Element showing a Environment with rooms and Things in it
         margin-top: -50px;
         margin-left: -50px;
       }
-      paper-icon-button /deep/ core-icon[role=img] {
+      paper-icon-button::shadow core-icon[role=img] {
         width: 50px;
         height: 50px;
       }
       .big-thing paper-icon-button {
         margin: 50px;
       }
-      .big-thing paper-icon-button /deep/ core-icon[role=img] {
+      .big-thing paper-icon-button::shadow core-icon[role=img] {
         width: 80px;
         height: 80px;
       }
@@ -92,7 +93,6 @@ Element showing a Environment with rooms and Things in it
     <fd-api-settings credentialRequired="{{credentialRequired}}" ssl="{{ssl}}" address="{{address}}" port="{{port}}" apiVersion="{{apiVersion}}" apiUrl="{{apiUrl}}" guestAccess="{{guest}}">
     </fd-api-settings>
 
-
     <fd-rest-service id="objectClick" auto="false" method="POST" guest="{{guest}}">
     </fd-rest-service>
 
@@ -104,8 +104,9 @@ Element showing a Environment with rooms and Things in it
 
     <fd-ws-service id="wss" ssl="{{ssl}}" address="{{address}}" port="{{port}}" apiVersion="{{apiVersion}}" wstype="objectchange" on-message="{{ updateObject }}" auto="false">
     </fd-ws-service>
-
+<fd-ispermitted permission="objects:move">
     <paper-fab id="toggleMove" icon="open-with" on-tap="{{toggleMove}}" title="Move" class="{{ {enabled: moveEnabled} | tokenList}}"></paper-fab>
+</fd-ispermitted>
     <paper-shadow animated z="1" id="externalContainer">
       <div layout vertical center>
         <template if="{{!simple}}">
