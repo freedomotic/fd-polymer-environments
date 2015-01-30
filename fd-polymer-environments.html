@@ -65,7 +65,7 @@ Element providing proof of concept of a Thing card, with all needed features
   </template>
   <template repeat="{{environment, index in environments}}">
     <template if="{{showEnvironment(index, currShowing)}}">
-      <fd-environment environment="{{environment}}" simple="{{simple}}"></fd-environment> 
+      <fd-environment environment="{{environment}}" simple="{{simple}}" ></fd-environment> 
     </template>
   </template>
     
@@ -115,10 +115,9 @@ Element providing proof of concept of a Thing card, with all needed features
     },
     environmentsChanged: function(){
       if (!!this.environments){
-        if (this.environments.length > 0){
-          this.nextExists = true;
-        }
+        this.nextExists = (this.environments.length > 1) ? true: false;
       }
+      this.currShowing=0;
     },
     showEnvironment: function(idx, curr){
       if (this.showNavigation){
