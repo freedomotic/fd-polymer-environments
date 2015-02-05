@@ -2,13 +2,18 @@
 <link rel="import" href="../core-drag-drop/core-drag-drop.html">
 <link rel="import" href="../core-animated-pages/core-animated-pages.html">
 <link rel="import" href="../core-image/core-image.html">
+<link rel="import" href="../core-menu/core-menu.html">
+<link rel="import" href="../core-icon-button/core-icon-button.html">
 <link rel="import" href="../paper-shadow/paper-shadow.html">
 <link rel="import" href="../paper-fab/paper-fab.html">
-<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-item/paper-item.html">
+<link rel="import" href="../paper-menu-button/paper-menu-button.html">
+<link rel="import" href="../paper-dropdown/paper-dropdown.html">
 <link rel="import" href="../fd-polymer-api-settings/fd-polymer-api-settings.html">
 <link rel="import" href="../fd-polymer-rest-service/fd-polymer-rest-service.html">
 <link rel="import" href="../fd-polymer-ws-service/fd-polymer-ws-service.html">
 <link rel="import" href="../fd-polymer-ispermitted/fd-polymer-ispermitted.html">
+<link rel="import" href="../fd-polymer-i18next-translate/fd-polymer-i18next-translate.html">
 
 <link rel="import" href="./nautes-zone.html">
 <!--
@@ -118,17 +123,36 @@ Element showing a Environment with rooms and Things in it
     <fd-ws-service id="wss" ssl="{{ssl}}" address="{{address}}" port="{{port}}" apiVersion="{{apiVersion}}" wstype="objectchange" on-message="{{ updateObject }}" auto="false">
     </fd-ws-service>
     <h4 id="envname">{{environment.name}}</h4>
+
+<fd-ispermitted permission="environments:update">
     <div layout horizontal id="toggleMove">
-      <fd-ispermitted permission="objects:move">
-        <paper-fab icon="open-with" on-tap="{{toggleMove}}" title="Move" class="{{ {enabled: moveEnabled} | tokenList}}"></paper-fab>
-      </fd-ispermitted>
-      <fd-ispermitted permission="environments:create">
-        <paper-fab icon="content-copy" on-tap="{{doCopy}}" title="Duplicate" class="{{ {enabled: moveEnabled} | tokenList}}"></paper-fab>
-      </fd-ispermitted>
-      <fd-ispermitted permission="environments:create">
-        <paper-fab icon="delete" on-tap="{{doDelete}}" title="Delete" class="{{ {enabled: moveEnabled} | tokenList}}"></paper-fab>
-      </fd-ispermitted>
+      <paper-menu-button>
+        <paper-icon-button icon="menu" noink></paper-icon-button>
+        <paper-dropdown class="dropdown">
+          <core-menu class="menu">
+            <fd-ispermitted permission="objects:update">
+              <paper-item on-tap="{{toggleMove}}">
+                <core-icon icon="open-with" class="{{ {enabled: moveEnabled} | tokenList}}"></core-icon>
+                <span>Move</span>
+              </paper-item>
+            </fd-ispermitted>
+            <fd-ispermitted permission="environments:create">
+              <paper-item on-tap="{{doCopy}}">
+                <core-icon icon="content-copy"></core-icon>
+                <span>{{ 'duplicate' | translate}}</span>
+              </paper-item>
+            </fd-ispermitted>
+            <fd-ispermitted permission="environments:delete">
+              <paper-item on-tap="{{doDelete}}">
+                <core-icon icon="delete"></core-icon>
+                <span>{{ 'delete' | translate}}</span>
+              </paper-item>
+            </fd-ispermitted>
+          </core-menu>
+        </paper-dropdown>
+      </paper-menu-button>
     </div>
+    </fd-ispermitted>
     <paper-shadow animated z="1" id="externalContainer">
       <div layout vertical center>
         <template if="{{!simple}}">
@@ -171,168 +195,168 @@ Element showing a Environment with rooms and Things in it
   </template>
   <script>
     Polymer("fd-environment", {
-          /**
-           * The 'guest' attribute tells whether the API call should use guest access (guest:guest) or user-provided data
-           *
-           * @attribute guest
-           * @type boolean
-           */
-          /**
-           * A provided 'environment' object
-           *
-           * @attribute environment
-           * @type object
-           */
-          /**
-           * The 'envuuid' attribute tells which environment should be retrieved through a API call
-           *
-           * @attribute envuuid
-           * @type string
-           */
-          page: 0,
-          simple: false,
-          sizing: "contain",
-          scaleFactor: 1.0,
-          moveEnabled: false,
-          selectedThing: undefined,
-          objTap: function(event, t, d) {
-            this.$.objectClick.fdtype = "things/" + d.id + "/click";
-            this.$.objectClick.go();
-          },
-          startWS: function() {
-            this.resize();
-            this.$.wss.go();
-          },
-          objPosition: function(obj) {
-            if (!!obj) {
-              return 'left:' + obj.representation[0].offset.x + 'px;' + 'top:' + obj.representation[0].offset.y + 'px;'
-            }
-          },
-          scaleFactorChanged: function() {
-            if (this.scaleFactor) {
-              var scaleStr = "scale(" + this.scaleFactor + "," + this.scaleFactor + ")";
-              var element = this.$.container;
-              element.style.transform = scaleStr;
-              element.style.WebkitTransform = scaleStr;
-              element.style.msTransform = scaleStr;
-              // element.style.position = 'relative';
+      /**
+       * The 'guest' attribute tells whether the API call should use guest access (guest:guest) or user-provided data
+       *
+       * @attribute guest
+       * @type boolean
+       */
+      /**
+       * A provided 'environment' object
+       *
+       * @attribute environment
+       * @type object
+       */
+      /**
+       * The 'envuuid' attribute tells which environment should be retrieved through a API call
+       *
+       * @attribute envuuid
+       * @type string
+       */
+      page: 0,
+      simple: false,
+      sizing: "contain",
+      scaleFactor: 1.0,
+      moveEnabled: false,
+      selectedThing: undefined,
+      objTap: function(event, t, d) {
+        this.$.objectClick.fdtype = "things/" + d.id + "/click";
+        this.$.objectClick.go();
+      },
+      startWS: function() {
+        this.resize();
+        this.$.wss.go();
+      },
+      objPosition: function(obj) {
+        if (!!obj) {
+          return 'left:' + obj.representation[0].offset.x + 'px;' + 'top:' + obj.representation[0].offset.y + 'px;'
+        }
+      },
+      scaleFactorChanged: function() {
+        if (this.scaleFactor) {
+          var scaleStr = "scale(" + this.scaleFactor + "," + this.scaleFactor + ")";
+          var element = this.$.container;
+          element.style.transform = scaleStr;
+          element.style.WebkitTransform = scaleStr;
+          element.style.msTransform = scaleStr;
+          // element.style.position = 'relative';
 
-              var verticalOffset = -(this.environment.height * (1 - this.scaleFactor)) / 2 + 5;
-              element.style.top = verticalOffset + "px";
+          var verticalOffset = -(this.environment.height * (1 - this.scaleFactor)) / 2 + 5;
+          element.style.top = verticalOffset + "px";
 
-              var maxHeight = this.environment.height * this.scaleFactor + 10;
-              if (!this.simple) {
-                maxHeight += this.$.title.offsetHeight;
-              }
-              this.$.externalContainer.style.maxHeight = maxHeight + "px";
-              var maxWidth = this.environment.width * this.scaleFactor + 10;
-              this.$.externalContainer.style.maxWidth = maxWidth + "px";
+          var maxHeight = this.environment.height * this.scaleFactor + 10;
+          if (!this.simple) {
+            maxHeight += this.$.title.offsetHeight;
+          }
+          this.$.externalContainer.style.maxHeight = maxHeight + "px";
+          var maxWidth = this.environment.width * this.scaleFactor + 10;
+          this.$.externalContainer.style.maxWidth = maxWidth + "px";
 
-              // console.log("External height: " + maxHeight + "px");
-              // console.log("Internal scalefactor: " + this.scaleFactor);
-            }
-          },
-          ready: function() {
-            if (!!this.envuuid) {
-              this.$.envData.auto = true;
-              this.$.envData.go();
-            }
-            else {
-              this.$.wss.go();
-            }
-            this.resize();
-            var element = this;
-            window.addEventListener('resize', function(event) {
-              element.resize();
-            });
-          },
-          resize: function() {
-            // set this.scaleFactor and let scaleFactorChanged() do the rest
-            this.scaleFactor = this.getScaleFactor();
-          },
-          getScaleFactor: function() {
-            var scaleFactor = 1;
-            if (!!this.environment) {
-              var scaleFactorX = (window.innerWidth - 50) / this.environment.width;
-              // var scaleFactorX =  (this.offsetWidth  - 100) / this.environment.width;
-              var scaleFactorY = (window.innerHeight - 50) / this.environment.height;
-              // var scaleFactorY =  (this.offsetHeight - 150) / this.environment.height;
-              console.log(scaleFactorX + ":" + scaleFactorY);
-              if (this.sizing == "contain") {
-                scaleFactor = Math.min(scaleFactorX, scaleFactorY);
-              }
-              else if (this.sizing == "cover") {
-                scaleFactor = Math.max(scaleFactorX, scaleFactorY);
-              }
-            }
-            return scaleFactor;
-          },
-          updateObject: function(event) {
-            var data = JSON.parse(event.detail);
-            for (object in this.objects) {
-              if (data.uuid === this.objects[object].uuid) {
-                this.objects[object] = data;
-              }
-            }
-          },
-          dragStartHandler: function(e) {
+          // console.log("External height: " + maxHeight + "px");
+          // console.log("Internal scalefactor: " + this.scaleFactor);
+        }
+      },
+      ready: function() {
+        if (!!this.envuuid) {
+          this.$.envData.auto = true;
+          this.$.envData.go();
+        }
+        else {
+          this.$.wss.go();
+        }
+        this.resize();
+        var element = this;
+        window.addEventListener('resize', function(event) {
+          element.resize();
+        });
+      },
+      resize: function() {
+        // set this.scaleFactor and let scaleFactorChanged() do the rest
+        this.scaleFactor = this.getScaleFactor();
+      },
+      getScaleFactor: function() {
+        var scaleFactor = 1;
+        if (!!this.environment) {
+          var scaleFactorX = (window.innerWidth - 50) / this.environment.width;
+          // var scaleFactorX =  (this.offsetWidth  - 100) / this.environment.width;
+          var scaleFactorY = (window.innerHeight - 50) / this.environment.height;
+          // var scaleFactorY =  (this.offsetHeight - 150) / this.environment.height;
+          console.log(scaleFactorX + ":" + scaleFactorY);
+          if (this.sizing == "contain") {
+            scaleFactor = Math.min(scaleFactorX, scaleFactorY);
+          }
+          else if (this.sizing == "cover") {
+            scaleFactor = Math.max(scaleFactorX, scaleFactorY);
+          }
+        }
+        return scaleFactor;
+      },
+      updateObject: function(event) {
+        var data = JSON.parse(event.detail);
+        for (var object in this.objects) {
+          if (data.uuid === this.objects[object].uuid) {
+            this.objects[object] = data;
+          }
+        }
+      },
+      dragStartHandler: function(e) {
 
-            //set avatar icon
-            var dragInfo = e.detail;
-            dragInfo.scaleFactor = this.scaleFactor;
-            dragInfo.moveService = this.$.moveService;
+        //set avatar icon
+        var dragInfo = e.detail;
+        dragInfo.scaleFactor = this.scaleFactor;
+        dragInfo.moveService = this.$.moveService;
 
-            console.log(dragInfo);
-            if (dragInfo.event.path[0].attributes.draggable) {
+        console.log(dragInfo);
+        if (dragInfo.event.path[0].attributes.draggable) {
 
-              dragInfo.avatar.style.cssText = 'border: 3px solid black; width: ' + 50 * this.scaleFactor + 'px; height:' + 50 * this.scaleFactor + 'px; border-radius: 0 50px 50px 50px; background-color: rgba(200,200,200,0.3)';
-              console.log(dragInfo.event.path[0].id);
-              dragInfo.drag = function() {};
-              dragInfo.drop = this.drop;
-            }
-          },
-          drop: function(dragInfo) {
-            // move Thing to drop position
-            var f = dragInfo.framed;
-            var thing = dragInfo.event.target.templateInstance.model.envObject;
+          dragInfo.avatar.style.cssText = 'border: 3px solid black; width: ' + 50 * this.scaleFactor + 'px; height:' + 50 * this.scaleFactor + 'px; border-radius: 0 50px 50px 50px; background-color: rgba(200,200,200,0.3)';
+          console.log(dragInfo.event.path[0].id);
+          dragInfo.drag = function() {};
+          dragInfo.drop = this.drop;
+        }
+      },
+      drop: function(dragInfo) {
+        // move Thing to drop position
+        var f = dragInfo.framed;
+        var thing = dragInfo.event.target.templateInstance.model.envObject;
 
-            var newPos = {
-                x: f.x / dragInfo.scaleFactor,
-                y: f.y / dragInfo.scaleFactor
-              }
-              // POST updated data.
-            var url = "things/" + thing.uuid + "/move/" + Math.floor(newPos.x) + "/" + Math.floor(newPos.y);
-            dragInfo.moveService.fdtype = url;
-            dragInfo.moveService.go();
+        var newPos = {
+            x: f.x / dragInfo.scaleFactor,
+            y: f.y / dragInfo.scaleFactor
+          }
+          // POST updated data.
+        var url = "things/" + thing.uuid + "/move/" + Math.floor(newPos.x) + "/" + Math.floor(newPos.y);
+        dragInfo.moveService.fdtype = url;
+        dragInfo.moveService.go();
 
-          },
-          computeImg: function(item) {
-            var src = "";
-            if (!!item) {
-              try {
-                src = item.representation[item.currentRepresentation].icon;
-              }
-              catch (ex) {
+      },
+      computeImg: function(item) {
+        var src = "";
+        if (!!item) {
+          try {
+            src = item.representation[item.currentRepresentation].icon;
+          }
+          catch (ex) {
 
-              }
-            }
-            return src;
-          },
-          toggleMove: function() {
-            this.moveEnabled = !this.moveEnabled;
-          },
-          doCopy: function() {
-            this.$.envDup.go();
-          },
-          doDelete: function() {
-            if (confirm("Really delete?")) {
-                this.$.envDel.go();
-              }
-            },
-            reloadEnvs: function() {
-              this.fire("needrequery");
-            }
+          }
+        }
+        return src;
+      },
+      toggleMove: function() {
+        this.moveEnabled = !this.moveEnabled;
+      },
+      doCopy: function() {
+        this.$.envDup.go();
+      },
+      doDelete: function() {
+        if (confirm("Really delete?")) {
+          this.$.envDel.go();
+        }
+      },
+      reloadEnvs: function() {
+        this.fire("needrequery");
+      }
 
-          });
+    });
   </script>
 </polymer-element>
