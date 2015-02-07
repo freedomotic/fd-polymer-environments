@@ -83,17 +83,16 @@ Element showing a Environment with rooms and Things in it
         height: 100%;
       }
       #toggleMove {
-        right: 0px;
+        left: 0px;
         position: absolute;
-        z-index: 1000;
-        margin: 10px;
+        z-index: 100;
       }
       #envname {
+        right: 0px;
         position: absolute;
-        left: 0px;
         margin: 10px;
         padding: 0 5px;
-        z-index: 1000;
+        z-index: 100;
         background-color: rgba(120, 120, 120, 0.5);
         color: white;
       }
@@ -101,8 +100,8 @@ Element showing a Environment with rooms and Things in it
         background-color: #AAA;
         margin: 3px;
       }
-      .enabled {
-        background-color: #5677fc;
+      paper-icon-button:hover::shadow core-icon {
+        color:  #8BAE2D;;
       }
     </style>
     <fd-api-settings credentialRequired="{{credentialRequired}}" ssl="{{ssl}}" address="{{address}}" port="{{port}}" apiVersion="{{apiVersion}}" apiUrl="{{apiUrl}}" guestAccess="{{guest}}">
@@ -122,38 +121,37 @@ Element showing a Environment with rooms and Things in it
 
     <fd-ws-service id="wss" ssl="{{ssl}}" address="{{address}}" port="{{port}}" apiVersion="{{apiVersion}}" wstype="objectchange" on-message="{{ updateObject }}" auto="false">
     </fd-ws-service>
-    <h4 id="envname">{{environment.name}}</h4>
-
-<fd-ispermitted permission="environments:update">
-    <div layout horizontal id="toggleMove">
-      <paper-menu-button>
-        <paper-icon-button icon="menu" noink></paper-icon-button>
-        <paper-dropdown class="dropdown">
-          <core-menu class="menu">
-            <fd-ispermitted permission="objects:update">
-              <paper-item on-tap="{{toggleMove}}">
-                <core-icon icon="open-with" class="{{ {enabled: moveEnabled} | tokenList}}"></core-icon>
-                <span>Move</span>
-              </paper-item>
-            </fd-ispermitted>
-            <fd-ispermitted permission="environments:create">
-              <paper-item on-tap="{{doCopy}}">
-                <core-icon icon="content-copy"></core-icon>
-                <span>{{ 'duplicate' | translate}}</span>
-              </paper-item>
-            </fd-ispermitted>
-            <fd-ispermitted permission="environments:delete">
-              <paper-item on-tap="{{doDelete}}">
-                <core-icon icon="delete"></core-icon>
-                <span>{{ 'delete' | translate}}</span>
-              </paper-item>
-            </fd-ispermitted>
-          </core-menu>
-        </paper-dropdown>
-      </paper-menu-button>
-    </div>
-    </fd-ispermitted>
     <paper-shadow animated z="1" id="externalContainer">
+      <h4 id="envname">{{environment.name}}</h4>
+
+      <fd-ispermitted permission="environments:update:{{environment.uuid}}">
+        <paper-menu-button id="toggleMove">
+          <paper-icon-button icon="menu"></paper-icon-button>
+          <paper-dropdown class="dropdown">
+            <core-menu class="menu">
+              <fd-ispermitted permission="objects:update:{{environment.uuid}}">
+                <paper-item on-tap="{{toggleMove}}">
+                  <core-icon icon="open-with" class="{{ {enabled: moveEnabled} | tokenList}}"></core-icon>
+                  <span>Move</span>
+                </paper-item>
+              </fd-ispermitted>
+              <fd-ispermitted permission="environments:create:{{environment.uuid}}">
+                <paper-item on-tap="{{doCopy}}">
+                  <core-icon icon="content-copy"></core-icon>
+                  <span>{{ 'duplicate' | translate}}</span>
+                </paper-item>
+              </fd-ispermitted>
+              <fd-ispermitted permission="environments:delete:{{environment.uuid}}">
+                <paper-item on-tap="{{doDelete}}">
+                  <core-icon icon="delete"></core-icon>
+                  <span>{{ 'delete' | translate}}</span>
+                </paper-item>
+              </fd-ispermitted>
+            </core-menu>
+          </paper-dropdown>
+        </paper-menu-button>
+      </fd-ispermitted>
+
       <div layout vertical center>
         <template if="{{!simple}}">
           <div layout horizontal self-stretch id="title">
