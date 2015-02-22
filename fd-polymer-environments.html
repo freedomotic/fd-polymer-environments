@@ -19,7 +19,7 @@ Element providing proof of concept of a Thing card, with all needed features
 @status beta
 @homepage http://bestmazzo.github.io/fd-polymer-thing
 -->
-<polymer-element name="fd-environments" attributes="guest simple showNavigation">
+<polymer-element name="fd-environments" attributes="guest simple showNavigation showZones">
 
   <template>
      <style>
@@ -69,7 +69,7 @@ Element providing proof of concept of a Thing card, with all needed features
   </template>
   <template repeat="{{environment, index in environments}}">
     <template if="{{showEnvironment(index, currShowing)}}">
-      <fd-environment environment="{{environment}}" simple="{{simple}}" ></fd-environment> 
+      <fd-environment environment="{{environment}}" simple="{{simple}}" showZones="{{showZones}}"></fd-environment> 
     </template>
   </template>
     

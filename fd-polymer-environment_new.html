@@ -27,7 +27,7 @@ Element showing a Environment with rooms and Things in it
 @status alpha
 @homepage http://polymerlabs.github.io/fd-polymer-environment
 -->
-<polymer-element name="fd-environment" attributes="envuuid environment toast guest sizing simple showZones">
+<polymer-element name="fd-environment" attributes="envuuid environment toast guest sizing simple showzones">
   <template>
     <style>
       :host {
@@ -37,15 +37,13 @@ Element showing a Environment with rooms and Things in it
         font-weight: 300;
         font-family: RobotoDraft, 'Helvetica Neue', Helvetica, Arial;
         background-color: white;
-        overflow: hidden;
-        
       }
       canvas {
         position: absolute;
         z-index: 11;
       }
       #title {
-        background-color: #8bae2d;
+        background-color: rgba(139, 174, 45, 0.8);
         padding-left: 10px;
         color: white;
       }
@@ -69,14 +67,18 @@ Element showing a Environment with rooms and Things in it
         margin-top: -50px;
         margin-left: -50px;
       }
-      paper-icon-button::shadow core-icon[role=img] {
+      paper-icon-button::shadow #icon {
         width: 50px;
         height: 50px;
+      }
+      paper-icon-button.mini::shadow #icon {
+        width: 24px;
+        height: 24px;
       }
       .big-thing paper-icon-button {
         margin: 50px;
       }
-      .big-thing paper-icon-button::shadow core-icon[role=img] {
+      .big-thing paper-icon-button::shadow #icon {
         width: 80px;
         height: 80px;
       }
@@ -84,22 +86,29 @@ Element showing a Environment with rooms and Things in it
         width: 100%;
         height: 100%;
       }
-      .menu{
-        z-index: 120;
+      #toggleMove {
+        fdleft: 0px;
+        fdposition: absolute;
+        z-index: 100;
       }
       #envname {
-        margin: 10px;
         padding: 0 5px;
-        background-color: rgba(120, 120, 120, 0.5);
-        color: white;
+        font-weight: bold;
+        text-align: center;
       }
       paper-fab {
         background-color: #AAA;
         margin: 3px;
       }
-      paper-icon-button:hover::shadow core-icon {
-        color: #8BAE2D;
-        ;
+      .menu {
+        color: black;
+      }
+      #container {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0px;
+        left: 0px;
       }
     </style>
     <fd-api-settings credentialRequired="{{credentialRequired}}" ssl="{{ssl}}" address="{{address}}" port="{{port}}" apiVersion="{{apiVersion}}" apiUrl="{{apiUrl}}" guestAccess="{{guest}}">
@@ -120,60 +129,25 @@ Element showing a Environment with rooms and Things in it
     <fd-ws-service id="wss" ssl="{{ssl}}" address="{{address}}" port="{{port}}" apiVersion="{{apiVersion}}" wstype="objectchange" on-message="{{ updateObject }}" auto="false">
     </fd-ws-service>
     <paper-shadow animated z="1" id="externalContainer">
+      <div layout vertical>
 
-      <div layout vertical center>
-        <div layout horizontal justified self-stretch style="z-index:100;">
-        <fd-ispermitted permission="environments:update:{{environment.uuid}}">
-          <paper-menu-button  id="toggleMove">
-            <paper-icon-button icon="menu"></paper-icon-button>
-            <paper-dropdown class="dropdown">
-              <core-menu class="menu">
-                <fd-ispermitted permission="objects:update:{{environment.uuid}}">
-                  <paper-item on-tap="{{toggleMove}}">
-                    <core-icon icon="open-with" class="{{ {enabled: moveEnabled} | tokenList}}"></core-icon>
-                    <span>Move</span>
-                  </paper-item>
-                </fd-ispermitted>
-                <fd-ispermitted permission="environments:create:{{environment.uuid}}">
-                  <paper-item on-tap="{{doCopy}}">
-                    <core-icon icon="content-copy"></core-icon>
-                    <span>{{ 'duplicate' | translate}}</span>
-                  </paper-item>
-                </fd-ispermitted>
-                <fd-ispermitted permission="environments:delete:{{environment.uuid}}">
-                  <paper-item on-tap="{{doDelete}}">
-                    <core-icon icon="delete"></core-icon>
-                    <span>{{ 'delete' | translate}}</span>
-                  </paper-item>
-                </fd-ispermitted>
-              </core-menu>
-            </paper-dropdown>
-          </paper-menu-button>
-        </fd-ispermitted>
-               
-        <h4 id="envname" self-start>{{environment.name}}</h4>
-       </div>
-        <template if="{{!simple}}">
-          <div layout horizontal self-stretch id="title">
-            <h3>{{environment.name}}</h3>
-          </div>
-        </template>
-        <div relative id="container">
+        <div id="container">
           <core-drag-drop on-drag-start="{{dragStartHandler}}"></core-drag-drop>
-          <canvas id="environmentCanvas" width="{{environment.width}}px" height="{{environment.height}}px"></canvas>
-          <core-image fade sizing="contain" width="{{environment.width}}px" height="{{environment.height}}px" src="{{environment.backgroundImage | asFreedomoticResource(apiUrl) }}" preload></core-image>
-          <template if="{{showZones}}">
+          <core-image fit fade sizing="{{sizing}}" witgfdth="{{environment.width}}px" heighgtyht="{{environment.height}}px" src="{{environment.backgroundImage | asFreedomoticResource(apiUrl) }}" preload></core-image>
+          <template if="{{showzones}}">
+            <canvas id="environmentCanvas" width="{{environment.width}}px" height="{{environment.height}}px"></canvas>
             <template repeat="{{zone in environment.zones}}">
               <nautes-zone zone="{{zone}}" canvas="{{$.environmentCanvas}}" toast="{{toast}}"></nautes-zone>
             </template>
           </template>
+
           <fd-rest-service id="objService" fdtype="environments/{{environment.uuid}}/things" fditems="{{objects}}" toast="{{toast}}">
           </fd-rest-service>
 
           <template if="{{!moveEnabled}}">
             <div>
               <template repeat="{{envObject in objects}}">
-                <paper-icon-button class="thing" id="{{envObject.uuid}}" src="{{envObject.representation[envObject.currentRepresentation].icon | asFreedomoticResource(apiUrl)}}" on-tap="{{ objTap }}" style="{{objPosition(envObject)}}">
+                <paper-icon-button class="thing" id="{{envObject.uuid}}" src="{{envObject.representation[envObject.currentRepresentation].icon | asFreedomoticResource(apiUrl)}}" on-tap="{{ objTap }}" style="{{objPosition(envObject,scaleFactor)}}">
                 </paper-icon-button>
               </template>
             </div>
@@ -182,13 +156,44 @@ Element showing a Environment with rooms and Things in it
           <template if="{{moveEnabled}}">
             <div>
               <template repeat="{{envObject in objects}}">
-                <paper-icon-button class="thing movable" id="{{envObject.uuid}}" src="{{envObject.representation[envObject.currentRepresentation].icon | asFreedomoticResource(apiUrl)}}" style="{{objPosition(envObject)}}" draggable>
+                <paper-icon-button class="thing movable" id="{{envObject.uuid}}" src="{{envObject.representation[envObject.currentRepresentation].icon | asFreedomoticResource(apiUrl)}}" style="{{objPosition(envObject,scaleFactor)}}" draggable>
                 </paper-icon-button>
               </template>
             </div>
           </template>
         </div>
-        <div layout horizontal self-stretch class="footer"></div>
+        <template if="{{!simple}}">
+          <div layout horizontal absolute id="title">
+            <fd-ispermitted permission="environments:update:{{environment.uuid}}">
+              <paper-menu-button id="toggleMove">
+                <paper-icon-button class="mini" icon="menu"></paper-icon-button>
+                <paper-dropdown class="dropdown">
+                  <core-menu class="menu">
+                    <fd-ispermitted permission="objects:update:{{environment.uuid}}">
+                      <paper-item on-tap="{{toggleMove}}">
+                        <core-icon icon="open-with" class="{{ {enabled: moveEnabled} | tokenList}}"></core-icon>
+                        <span>Move</span>
+                      </paper-item>
+                    </fd-ispermitted>
+                    <fd-ispermitted permission="environments:create:{{environment.uuid}}">
+                      <paper-item on-tap="{{doCopy}}">
+                        <core-icon icon="content-copy"></core-icon>
+                        <span>{{ 'duplicate' | translate}}</span>
+                      </paper-item>
+                    </fd-ispermitted>
+                    <fd-ispermitted permission="environments:delete:{{environment.uuid}}">
+                      <paper-item on-tap="{{doDelete}}">
+                        <core-icon icon="delete"></core-icon>
+                        <span>{{ 'delete' | translate}}</span>
+                      </paper-item>
+                    </fd-ispermitted>
+                  </core-menu>
+                </paper-dropdown>
+              </paper-menu-button>
+            </fd-ispermitted>
+            <div self-center id="envname">{{environment.name}}</div>
+          </div>
+        </template>
       </div>
     </paper-shadow>
   </template>
@@ -214,7 +219,7 @@ Element showing a Environment with rooms and Things in it
        */
       page: 0,
       simple: false,
-      showZones:false,
+      showzones: false,
       sizing: "contain",
       scaleFactor: 1.0,
       moveEnabled: false,
@@ -227,30 +232,34 @@ Element showing a Environment with rooms and Things in it
         this.resize();
         this.$.wss.go();
       },
-      objPosition: function(obj) {
+      objPosition: function(obj, scale) {
         if (!!obj) {
-          return 'left:' + obj.representation[0].offset.x + 'px;' + 'top:' + obj.representation[0].offset.y + 'px;'
+          var left = obj.representation[0].offset.x * scale;
+          var top = obj.representation[0].offset.y * scale;
+          
+          return 'left:' + left + 'px;' + 'top:' + top + 'px;'
         }
       },
       scaleFactorChanged: function() {
         if (this.scaleFactor) {
-          var scaleStr = "scale(" + this.scaleFactor + "," + this.scaleFactor + ")";
-          var element = this.$.container;
-          element.style.transform = scaleStr;
-          element.style.WebkitTransform = scaleStr;
-          element.style.msTransform = scaleStr;
-          // element.style.position = 'relative';
+          if (false) {
+            var scaleStr = "scale(" + this.scaleFactor + "," + this.scaleFactor + ")";
+            var element = this.$.container;
+            element.style.transform = scaleStr;
+            element.style.WebkitTransform = scaleStr;
+            element.style.msTransform = scaleStr;
+            // element.style.position = 'relative';
 
-          var verticalOffset = -(this.environment.height * (1 - this.scaleFactor)) / 2 + 5;
-          element.style.top = verticalOffset + "px";
-
+            var verticalOffset = -(this.environment.height * (1 - this.scaleFactor)) / 2 + 5;
+            element.style.top = verticalOffset + "px";
+          }
           var maxHeight = this.environment.height * this.scaleFactor + 10;
           if (!this.simple) {
-            maxHeight += this.$.title.offsetHeight;
+            //maxHeight += this.$.title.offsetHeight;
           }
-          this.$.externalContainer.style.maxHeight = maxHeight + "px";
+          this.$.externalContainer.style.height = maxHeight + "px";
           var maxWidth = this.environment.width * this.scaleFactor + 10;
-          this.$.externalContainer.style.maxWidth = maxWidth + "px";
+          this.$.externalContainer.style.width = maxWidth + "px";
 
           // console.log("External height: " + maxHeight + "px");
           // console.log("Internal scalefactor: " + this.scaleFactor);
