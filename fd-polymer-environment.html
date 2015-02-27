@@ -137,13 +137,13 @@ Element showing a Environment with rooms and Things in it
                 <fd-ispermitted permission="environments:create:{{environment.uuid}}">
                   <paper-item on-tap="{{doCopy}}">
                     <core-icon icon="content-copy"></core-icon>
-                    <span>{{ 'duplicate' | translate}}</span>
+                    <span>{{ 'duplicate' | t}}</span>
                   </paper-item>
                 </fd-ispermitted>
                 <fd-ispermitted permission="environments:delete:{{environment.uuid}}">
                   <paper-item on-tap="{{doDelete}}">
                     <core-icon icon="delete"></core-icon>
-                    <span>{{ 'delete' | translate}}</span>
+                    <span>{{ 'delete' | t}}</span>
                   </paper-item>
                 </fd-ispermitted>
               </core-menu>
