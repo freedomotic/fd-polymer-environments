@@ -1,6 +1,6 @@
 {
   "name": "fd-polymer-environments",
-  "version": "0.7.3",
+  "version": "0.8.0",
   "keywords": [
     "freedomotic",
     "seed",
@@ -11,10 +11,10 @@
   "dependencies": {
     "polymer": "Polymer/polymer#^0.5.5",
     "fd-polymer-rest-service": "~0.2.6",
-    "fd-polymer-ws-service": "~0.1.8",
+    "fd-polymer-ws-service": "~0.2.0",
     "paper-elements": "polymer/paper-elements#~0.5.5",
     "core-drag-drop": "polymer/core-drag-drop#~0.5.5",
-    "fd-polymer-ispermitted": "~0.1.2",
+    "fd-polymer-ispermitted": "~0.2.0",
     "fd-polymer-i18next-translate": "~0.2.4"
   },
   "devDependencies": {
@@ -37,7 +37,8 @@
   "resolutions": {
     "fd-polymer-api-settings": "~0.2.0",
     "polymer": "~0.5.4",
-    "core-component-page": "^0.5.4"
+    "core-component-page": "^0.5.4",
+    "fd-polymer-ws-service": "^0.2.0"
   },
   "homepage": "https://github.com/freedomotic/fd-polymer-environment"
 }

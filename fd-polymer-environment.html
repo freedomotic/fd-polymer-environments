@@ -11,7 +11,7 @@
 <link rel="import" href="../paper-dropdown/paper-dropdown.html">
 <link rel="import" href="../fd-polymer-api-settings/fd-polymer-api-settings.html">
 <link rel="import" href="../fd-polymer-rest-service/fd-polymer-rest-service.html">
-<link rel="import" href="../fd-polymer-ws-service/fd-polymer-ws-service.html">
+<link rel="import" href="../fd-polymer-ws-service/fd-polymer-generic-ws.html">
 <link rel="import" href="../fd-polymer-ispermitted/fd-polymer-ispermitted.html">
 <link rel="import" href="../fd-polymer-i18next-translate/fd-polymer-i18next-translate.html">
 
@@ -117,8 +117,7 @@ Element showing a Environment with rooms and Things in it
     <fd-rest-service id="envDup" fdtype="environments/{{environment.uuid}}/copy" method="POST" on-rest-response="{{reloadEnvs}}" guest="{{guest}}" auto="false">
     </fd-rest-service>
 
-    <fd-ws-service id="wss" ssl="{{ssl}}" address="{{address}}" port="{{port}}" apiVersion="{{apiVersion}}" wstype="objectchange" on-message="{{ updateObject }}" auto="false">
-    </fd-ws-service>
+    <fd-generic-ws id="wss" type="objectchange" on-message="{{ updateObject }}" auto="false"></fd-generic-ws>
     <paper-shadow animated z="1" id="externalContainer">
 
       <div layout vertical center>
@@ -225,7 +224,7 @@ Element showing a Environment with rooms and Things in it
       },
       startWS: function() {
         this.resize();
-        this.$.wss.go();
+        this.$.wss.auto=true;
       },
       objPosition: function(obj) {
         if (!!obj) {
@@ -262,7 +261,7 @@ Element showing a Environment with rooms and Things in it
           this.$.envData.go();
         }
         else {
-          this.$.wss.go();
+          this.$.wss.auto=true;
         }
         this.resize();
         var element = this;
@@ -291,8 +290,8 @@ Element showing a Environment with rooms and Things in it
         }
         return scaleFactor;
       },
-      updateObject: function(event) {
-        var data = JSON.parse(event.detail);
+      updateObject: function(e) {
+        var data = e.detail;
         for (var object in this.objects) {
           if (data.uuid === this.objects[object].uuid) {
             this.objects[object] = data;
