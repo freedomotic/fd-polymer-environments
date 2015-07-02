@@ -53,6 +53,7 @@ Element showing a Environment with rooms and Things in it
         display: block;
         position: absolute;
         z-index: 1000;
+        transition: all 1s ease-in-out;
       }
       .movable {
         border: 3px solid black;
@@ -172,7 +173,7 @@ Element showing a Environment with rooms and Things in it
           <template if="{{!moveEnabled}}">
             <div>
               <template repeat="{{envObject in objects}}">
-                <paper-icon-button class="thing" id="{{envObject.uuid}}" src="{{envObject.representation[envObject.currentRepresentation].icon | asFreedomoticResource(apiUrl)}}" on-tap="{{ objTap }}" style="{{objPosition(envObject)}}">
+                <paper-icon-button class="thing" id="{{envObject.uuid}}" src="{{envObject.representation[envObject.currentRepresentation].icon | asFreedomoticResource(apiUrl)}}" on-tap="{{ objTap }}" style="{{objPosition(envObject.representation[0].offset)}}">
                 </paper-icon-button>
               </template>
             </div>
@@ -181,7 +182,7 @@ Element showing a Environment with rooms and Things in it
           <template if="{{moveEnabled}}">
             <div>
               <template repeat="{{envObject in objects}}">
-                <paper-icon-button class="thing movable" id="{{envObject.uuid}}" src="{{envObject.representation[envObject.currentRepresentation].icon | asFreedomoticResource(apiUrl)}}" style="{{objPosition(envObject)}}" draggable>
+                <paper-icon-button class="thing movable" id="{{envObject.uuid}}" src="{{envObject.representation[envObject.currentRepresentation].icon | asFreedomoticResource(apiUrl)}}" style="{{objPosition(envObject.representation[0].offset)}}" draggable>
                 </paper-icon-button>
               </template>
             </div>
@@ -226,9 +227,9 @@ Element showing a Environment with rooms and Things in it
         this.resize();
         this.$.wss.auto=true;
       },
-      objPosition: function(obj) {
-        if (!!obj) {
-          return 'left:' + obj.representation[0].offset.x + 'px;' + 'top:' + obj.representation[0].offset.y + 'px;'
+      objPosition: function(offset) {
+        if (!!offset) {
+          return 'left:' + offset.x + 'px;' + 'top:' + offset.y + 'px;'
         }
       },
       scaleFactorChanged: function() {
@@ -294,7 +295,9 @@ Element showing a Environment with rooms and Things in it
         var data = e.detail;
         for (var object in this.objects) {
           if (data.uuid === this.objects[object].uuid) {
-            this.objects[object] = data;
+            console.log(data);
+            this.objects[object].representation = data.representation;
+            this.objects[object].currentRepresentation = data.currentRepresentation;
           }
         }
       },
